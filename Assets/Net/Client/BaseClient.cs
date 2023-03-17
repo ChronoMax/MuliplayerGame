@@ -59,14 +59,33 @@ public class BaseClient : MonoBehaviour
             }
             else if (cmd == NetworkEvent.Type.Data)
             {
-                uint value = stream.ReadByte();
-                Debug.Log("Got value from the server: " + value);
+                OnData(stream);
             }
             else if (cmd == NetworkEvent.Type.Disconnect)
             {
                 Debug.Log("Disconnected from the server!");
             }
         }
+    }
+    public virtual void OnData(DataStreamReader stream)
+    {
+        NetMessage msg = null;
+        var opCode = (OpCode)stream.ReadByte();
+
+        switch (opCode)
+        {
+            case OpCode.CHAT_MESSAGE:
+                msg = new Net_ChatMessage(stream);
+                break;
+            case OpCode.PLAYER_POS:
+                msg = new Net_PlayerPos(stream);
+                break;
+            default:
+                Debug.Log("No OpCode recieved!");
+                break;
+        }
+
+        msg.RecievedOnClient();
     }
     public virtual void SendToServer(NetMessage msg)
     {

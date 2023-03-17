@@ -46,9 +46,10 @@ public class Net_PlayerPos : NetMessage
         PosZ = reader.ReadFloat();
     }
 
-    public override void RecievedOnServer()
+    public override void RecievedOnServer(BaseServer server)
     {
         Debug.Log("[SERVER]: " + PlayerID + " :: " + PosX + " :: " + PosY + ":: " + PosZ);
+        server.Broadcast(this);
     }
 
     public override void RecievedOnClient()

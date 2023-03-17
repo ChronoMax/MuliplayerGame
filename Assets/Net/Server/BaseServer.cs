@@ -100,13 +100,30 @@ public class BaseServer : MonoBehaviour
         {
             case OpCode.CHAT_MESSAGE: msg = new Net_ChatMessage(stream);
                 break;
-            case OpCode.PLAYER_POS: msg = new Net_ChatMessage(stream);
+            case OpCode.PLAYER_POS: msg = new Net_PlayerPos(stream);
                 break;
             default:
                 Debug.Log("No OpCode recieved!");
                 break;
         }
 
-        msg.RecievedOnServer();
+        msg.RecievedOnServer(this);
+    }
+    public virtual void Broadcast(NetMessage msg)//sending data to all clients.
+    {
+        for (int i = 0; i < connections.Length; i++)
+        {
+            if (connections[i].IsCreated)
+            {
+                SendToClient(connections[i], msg);
+            }
+        }
+    }
+    public virtual void SendToClient(NetworkConnection connection, NetMessage msg)//send data to one client.
+    {
+        DataStreamWriter writer;
+        driver.BeginSend(connection, out writer); //write to server.
+        msg.Serialize(ref writer); //fill the data.
+        driver.EndSend(writer); //send to server.
     }
 }
